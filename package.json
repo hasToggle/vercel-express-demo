@@ -1,0 +1,12 @@
+{
+  "name": "vercel-express-demo",
+  "version": "0.0.1",
+  "description": "demo for an express app on Vercel",
+  "main": "app.js",
+  "scripts": {
+    "start": "vercel dev"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
