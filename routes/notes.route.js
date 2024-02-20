@@ -16,7 +16,7 @@ r.put("/", async (req, res) => {
   await createTables();
   const user = req.params.user;
   const notesId = req.params.id;
-  const { content } = JSON.parse(req.body);
+  const { content } = req.body;
 
   if (content) {
     /* first check to see if we can find the user */
