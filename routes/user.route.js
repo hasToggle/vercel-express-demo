@@ -15,6 +15,8 @@ r.get("/", async (req, res) => {
 });
 
 r.post("/", async (req, res) => {
+  console.log("IN POST");
+  console.log(req.body);
   await createTables();
   const user = req.params.user;
   const { content } = JSON.parse(req.body);
