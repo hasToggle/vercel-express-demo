@@ -1,18 +1,13 @@
 const { Router } = require("express");
 const postgres = require("@vercel/postgres");
-const dynamic = require("./demo.route");
+const user = require("./user.route");
 
 const r = Router();
 
-r.use("/demo", dynamic);
-
-r.get("/", async (req, res) => {
-  await createNotes();
-  const { rows } = await postgres.sql`SELECT * from NOTES`;
-  return res.json(Object.values(rows));
-});
+r.use("/:user", user);
 
 r.get("/:id", async (req, res) => {
+  await createTables();
   const id = req.params.id;
   const { rows } = await postgres.sql`SELECT * FROM notes WHERE id=${id}`;
 
@@ -24,6 +19,7 @@ r.get("/:id", async (req, res) => {
 });
 
 r.put("/:id", async (req, res) => {
+  await createTables();
   const id = req.params.id;
   const { content } = JSON.parse(req.body);
 
@@ -38,6 +34,7 @@ r.put("/:id", async (req, res) => {
 });
 
 r.delete("/:id", async (req, res) => {
+  await createTables();
   const id = req.params.id;
 
   const { rowCount } = await postgres.sql`DELETE FROM notes WHERE id=${id}`;
@@ -49,25 +46,22 @@ r.delete("/:id", async (req, res) => {
   return res.json("Successfully deleted the note.");
 });
 
-r.post("/", async (req, res) => {
-  await createNotes();
-  const { content } = JSON.parse(req.body);
-  if (content) {
-    await postgres.sql`INSERT INTO notes (content) VALUES (${content})`;
-    return res.json("Successfully created note");
-  } else {
-    return res.json("Note NOT created since content is missing.");
-  }
-});
-
 module.exports = r;
 
-async function createNotes() {
-  return await postgres.sql`
-    CREATE TABLE IF NOT EXISTS notes (
+async function createTables() {
+  await postgres.sql`
+    CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
-        content VARCHAR(255) NOT NULL,
+        name VARCHAR(255) UNIQUE NOT NULL,
         "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
         );
     `;
+  await postgres.sql`
+      CREATE TABLE IF NOT EXISTS notes (
+          id SERIAL PRIMARY KEY,
+          content VARCHAR(255) NOT NULL,
+          "userId" integer REFERENCES users (id),
+          "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+          );
+      `;
 }
