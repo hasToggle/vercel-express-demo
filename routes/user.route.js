@@ -15,9 +15,11 @@ r.get("/", async (req, res) => {
 });
 
 r.post("/", async (req, res) => {
+  console.log("IN POST");
+  console.log(req.body);
   await createTables();
   const user = req.params.user;
-  const { content } = JSON.parse(req.body);
+  const { content } = req.body;
 
   if (content) {
     /* create a new user if that user doesn't already exist */

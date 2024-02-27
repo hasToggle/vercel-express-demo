@@ -16,7 +16,7 @@ r.put("/", async (req, res) => {
   await createTables();
   const user = req.params.user;
   const notesId = req.params.id;
-  const { content } = JSON.parse(req.body);
+  const { content } = req.body;
 
   if (content) {
     /* first check to see if we can find the user */
@@ -39,29 +39,25 @@ r.put("/", async (req, res) => {
 });
 
 r.delete("/", async (req, res) => {
+  console.log("IN DELETE");
   await createTables();
   const user = req.params.user;
   const notesId = req.params.id;
-  const { content } = JSON.parse(req.body);
 
-  if (content) {
-    /* first check to see if we can find the user */
-    const {
-      rows: [{ id }],
-    } = await postgres.sql`SELECT id FROM users WHERE users.name=${user}`;
+  /* first check to see if we can find the user */
+  const {
+    rows: [{ id }],
+  } = await postgres.sql`SELECT id FROM users WHERE users.name=${user}`;
 
-    /* then use that user's id to delete the requested note */
-    const { rowCount } =
-      await postgres.sql`DELETE FROM notes WHERE notes."userId"=${id} AND notes.id=${notesId}`;
+  /* then use that user's id to delete the requested note */
+  const { rowCount } =
+    await postgres.sql`DELETE FROM notes WHERE notes."userId"=${id} AND notes.id=${notesId}`;
 
-    if (!rowCount) {
-      return res.json({ error: "note not found" });
-    }
-
-    return res.json("Successfully deleted note");
-  } else {
-    return res.json("Note NOT created since content is missing.");
+  if (!rowCount) {
+    return res.json({ error: "note not found" });
   }
+
+  return res.json("Successfully deleted note");
 });
 
 module.exports = r;
